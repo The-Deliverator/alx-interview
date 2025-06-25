@@ -1,41 +1,37 @@
 #!/usr/bin/python3
-"""Prime game module"""
+""" Module for  the Prime Game question """
 
 
 def isWinner(x, nums):
-    def is_prime(num):
-        """Return True if num is a prime number."""
-        if num < 2:
-            return False
-        for i in range(2, int(num ** 0.5) + 1):
-            if num % i == 0:
-                return False
-        return True
-
-    def prime_count(n):
-        """Return the number of primes from 1 to n."""
-        count = 0
-        for i in range(1, n + 1):
-            if is_prime(i):
-                count += 1
-        return count
-
+    """Determines the winner of the prime number game"""
     if not nums or x < 1:
         return None
 
-    maria_score = 0
-    ben_score = 0
+    max_num = max(nums)
 
-    for n in nums:
-        primes = prime_count(n)
-        if primes % 2 == 1:
-            maria_score += 1
-        else:
-            ben_score += 1
+    # Sieve of Eratosthenes to determine prime numbers up to max_num
+    is_prime = [True] * (max(max_num + 1, 2))
+    is_prime[0] = is_prime[1] = False
 
-    if maria_score > ben_score:
-        return "Maria"
-    elif ben_score > maria_score:
-        return "Ben"
-    return None
+    for i in range(2, int(max_num**0.5) + 1):
+        if is_prime[i]:
+            for j in range(i * i, max_num + 1, i):
+                is_prime[j] = False
 
+    # Build cumulative count of primes up to each index
+    prime_count_up_to = [0] * len(is_prime)
+    count = 0
+    for i in range(len(is_prime)):
+        if is_prime[i]:
+            count += 1
+        prime_count_up_to[i] = count
+
+    # Determine who wins more rounds
+    maria_wins = 0
+    for num in nums:
+        if prime_count_up_to[num] % 2 == 1:
+            maria_wins += 1
+
+    if maria_wins * 2 == len(nums):
+        return None
+    return "Maria" if maria_wins * 2 > len(nums) else "Ben"
